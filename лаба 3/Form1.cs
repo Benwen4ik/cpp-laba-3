@@ -14,13 +14,13 @@ namespace лаба_3
     public partial class Form1 : Form
     {
 
-        private const int NumStones = 10; // Количество объектов Stone для создания
+        private const int NumStones = 20; // Количество объектов Stone для создания
         private const int NumPaper = 10;
-        private const int MaxSpeed = 5;
+        private const int MaxSpeed = 10;
         private readonly Random random = new Random();
         private readonly object lockObject = new object();
         private readonly List<Stone> stones = new List<Stone>();
-        private readonly List<Paper> papers = new List<Paper>();
+        private readonly List<Symbol> symbols = new List<Symbol>();
         public Form1()
         {
             InitializeComponent();
@@ -33,51 +33,52 @@ namespace лаба_3
             // Создаем потоки для создания и размещения объектов Stone
             for (int i = 0; i < NumStones; i++)
             {
-                Thread thread = new Thread(CreateAndMoveStone);
+                Thread thread = new Thread(CreateAndMoveSymbol);
                 thread.Start();
             }
         }
 
-        private void CreateAndMoveStone()
+        private void CreateAndMoveSymbol()
         {
-            try { 
-            // Создаем новый объект Stone
-            Stone stone = new Stone();
-
+            try {
+                // Создаем новый объект Stone
+                // Stone stone = new Stone();
+                Symbol symbol = new Symbol();
+                //T box = new T();
                 // Генерируем случайные координаты для объекта Stone
-                int x = random.Next(Width - stone.Width);
-                int y = random.Next(Height - stone.Height);
+                int x = random.Next(Width - symbol.Width);
+                int y = random.Next(Height - symbol.Height);
 
                 // Генерируем случайное направление движения
-             //   int dx = random.Next(-MaxSpeed, MaxSpeed + 1);
-             //   int dy = random.Next(-MaxSpeed, MaxSpeed + 1);
-                stone.setDx(random.Next(-MaxSpeed, MaxSpeed + 1));
-                stone.setDy(random.Next(-MaxSpeed, MaxSpeed + 1));
+                //   int dx = random.Next(-MaxSpeed, MaxSpeed + 1);
+                //   int dy = random.Next(-MaxSpeed, MaxSpeed + 1);
+                symbol.setDx(random.Next(-MaxSpeed, MaxSpeed + 1));
+                symbol.setDy(random.Next(-MaxSpeed, MaxSpeed + 1));
                 // Размещаем объект Stone на форме
-                stone.Location = new System.Drawing.Point(x, y);
-                AddStone(stone);
+                symbol.Location = new System.Drawing.Point(x, y);
+                AddSymbol(symbol);
 
                 // Запускаем бесконечный цикл для перемещения объекта Stone
                 while (true)
                 {
                     // Перемещаем объект Stone
-                    MoveStone(stone);
+                    MoveSymbol(symbol);
 
                     // Проверяем, достиг ли объект Stone границы формы
-                    if (stone.Left <= 0 || stone.Right >= ClientSize.Width)
+                    if (symbol.Left <= 0 || symbol.Right >= ClientSize.Width)
                     {
                         // dx = -dx; // Изменяем направление движения по оси X
-                        stone.setDx(-stone.getDx());
+                        symbol.setDx(-symbol.getDx());
                     }
 
-                    if (stone.Top <= 0 || stone.Bottom >= ClientSize.Height)
+                    if (symbol.Top <= 0 || symbol.Bottom >= ClientSize.Height)
                     {
                         //  dy = -dy; // Изменяем направление движения по оси Y
-                        stone.setDy(-stone.getDy());
+                        symbol.setDy(-symbol.getDy());
                     }
 
                     // Проверяем столкновения с другими объектами Stone
-                    CheckCollisions(stone);
+                    CheckCollisions(symbol);
                     // Приостанавливаем поток на некоторое время
                     Thread.Sleep(100);
                 }
@@ -91,62 +92,62 @@ namespace лаба_3
             }
         }
 
-        private void AddStone(Stone stone)
+        private void AddSymbol(Symbol symbol)
         {
             // Выполняем добавление объекта Stone на форму из главного потока
             if (InvokeRequired)
             {
-                Invoke(new Action<Stone>(AddStone), stone);
+                Invoke(new Action<Symbol>(AddSymbol), symbol);
             }
             else
             {
-                stones.Add(stone);
-                Controls.Add(stone);
+                symbols.Add(symbol);
+                Controls.Add(symbol);
             }
         }
 
-        private void MoveStone(Stone stone)
+        private void MoveSymbol(Symbol symbol)
         {
             // Выполняем перемещение объекта Stone на форме из главного потока
             if (InvokeRequired)
             {
-                Invoke(new Action<Stone>(MoveStone), stone);
+                Invoke(new Action<Symbol>(MoveSymbol), symbol);
             }
             else
             {
                 // Используем блокировку, чтобы предотвратить одновременный доступ к объекту Stone из разных потоков
                 lock (lockObject)
                 {
-                    stone.Left += stone.getDx();
-                    stone.Top += stone.getDy();
+                    symbol.Left += symbol.getDx();
+                    symbol.Top += symbol.getDy();
                 }
             }
         }
 
-        private void CheckCollisions(Stone stone)
+        private void CheckCollisions(Symbol symbol)
         {
             lock (lockObject)
             {
-                foreach (Stone otherStone in stones)
+                foreach (Symbol otherSymbol in symbols)
                 {
-                    if (otherStone != stone && stone.Bounds.IntersectsWith(otherStone.Bounds))
+                    if (otherSymbol != symbol && symbol.Bounds.IntersectsWith(otherSymbol.Bounds))
                     {
                         // Обнаружено столкновение
-                        Point collisionPoint = GetCollisionPoint(stone, otherStone);
-                        stone.ChangeDirection(collisionPoint);
-                        otherStone.ChangeDirection(collisionPoint);
+                        Point collisionPoint = GetCollisionPoint(symbol, otherSymbol);
+                        symbol.ChangeDirection(collisionPoint);
+                        otherSymbol.ChangeDirection(collisionPoint);
                     }
                 }
             }
         }
 
-        private Point GetCollisionPoint(Stone stone1, Stone stone2)
+        private Point GetCollisionPoint(Symbol symbol1, Symbol symbol2)
         {
             // Вычисляет центр пересечения границ двух объектов Stone
-            int x1 = stone1.Left + stone1.Width / 2;
-            int y1 = stone1.Top + stone1.Height / 2;
-            int x2 = stone2.Left + stone2.Width / 2;
-            int y2 = stone2.Top + stone2.Height / 2;
+            int x1 = symbol1.Left + symbol1.Width / 2;
+            int y1 = symbol1.Top + symbol1.Height / 2;
+            int x2 = symbol2.Left + symbol2.Width / 2;
+            int y2 = symbol2.Top + symbol2.Height / 2;
 
             int collisionX = (x1 + x2) / 2;
             int collisionY = (y1 + y2) / 2;

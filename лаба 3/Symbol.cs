@@ -8,16 +8,16 @@ using System.Windows.Forms;
 
 namespace лаба_3
 {
-    public class Paper : PictureBox
+    public class Symbol : PictureBox
     {
         private const int MaxSpeed = 5;
         private static readonly Random random = new Random();
         private int dx;
         private int dy;
-        public Paper()
+        public Symbol()
         {
             // Установка изображения для объекта 
-            Image = Properties.Resources.paper;
+            Image = Properties.Resources.камень;
             SizeMode = PictureBoxSizeMode.AutoSize;
         }
 
