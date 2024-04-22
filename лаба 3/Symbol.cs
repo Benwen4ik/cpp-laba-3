@@ -31,7 +31,7 @@ namespace лаба_3
             {
                 case 1:
                     {
-                        Image = Properties.Resources.paper3;
+                        Image = Properties.Resources.бумага3;
                         break;
                     }
                 case 2:

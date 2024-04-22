@@ -15,62 +15,74 @@ namespace лаба_3
     public partial class Form1 : Form
     {
 
-        private const int NumStones = 0; // Количество объектов Stone для создания
-        private const int NumPaper = 5;
-        private const int NumScissors = 5;
+        private int NumStones = 3; // Количество объектов Stone для создания
+        private int NumPaper = 3;
+        private int NumScissors = 3;
         private const int MaxSpeed = 5;
         private const int MinDistance = 50;
         private readonly Random random = new Random();
+        List<Symbol> controlsToRemove = new List<Symbol>();
         private readonly object lockObject = new object();
-        private readonly List<Stone> stones = new List<Stone>();
         private readonly List<Symbol> symbols = new List<Symbol>();
        // private List<Point> coordinates = new List<Point>();
         private List<Thread> threads = new List<Thread>();
+        private bool Pause = true;
+        private volatile bool isRunning = true;
         public Form1()
         {
             InitializeComponent();
+            stonecount.Text = "3";
+            papercount.Text = "3";
+            scissorscount.Text = "3";
         }
 
 
 
         private void button1_Click(object sender, EventArgs e)
         {
+            isRunning = true;
+            NumStones = Convert.ToInt32(stonecount.Text);
+            NumScissors = Convert.ToInt32(scissorscount.Text);
+            NumPaper = Convert.ToInt32(papercount.Text);
             if (threads.Count == 0)
             {
                 // Создаем потоки для создания и размещения объектов Stone
                 for (int i = 0; i < NumStones; i++)
                 {
-                    Thread thread = new Thread(CreateAndMoveSymbol);
+                    Thread thread = new Thread(CreateSymbol);
                     threads.Add(thread);
                     thread.Start(2);
                 }
                 for (int i = 0; i < NumPaper; i++)
                 {
-                    Thread thread = new Thread(CreateAndMoveSymbol);
+                    Thread thread = new Thread(CreateSymbol);
                     threads.Add(thread);
                     thread.Start(1);
                 }
                 for (int i = 0; i < NumScissors; i++)
                 {
-                    Thread thread = new Thread(CreateAndMoveSymbol);
+                    Thread thread = new Thread(CreateSymbol);
                     threads.Add(thread);
                     thread.Start(3);
                 }
-            } 
+            } else
+            {
+                for (int i=0; i< threads.Count; i++)
+                {
+                    //threads[i].Start() ;
+                }
+            }
         }
 
-
-
-        private void CreateAndMoveSymbol(object type)
+        private void CreateSymbol (object type)
         {
-            try {
+            try
+            {
                 // Создаем новый объект Stone
-                // Stone stone = new Stone();
                 Symbol symbol = new Symbol((int)type);
-                //T box = new T();
                 // Генерируем случайные координаты для объекта Stone
-                int x = random.Next(Width - 2*symbol.Width);
-                int y = random.Next(Height - 2*symbol.Height);
+                int x = random.Next(Width - 2 * symbol.Width);
+                int y = random.Next(Height - 2 * symbol.Height);
 
                 // Проверяем, нет ли других объектов Stone вблизи сгенерированных координат
                 while (HasCollision(symbols, x, y))
@@ -86,14 +98,34 @@ namespace лаба_3
                 // Размещаем объект Stone на форме
                 symbol.Location = new System.Drawing.Point(x, y);
                 AddSymbol(symbol);
+                CycleMoveSymbol(symbol);
+            } catch (Exception e)
+            {
+                MessageBox.Show("Error: " +  e.Message);
+            }
+        }
 
+
+
+        private void CycleMoveSymbol(Symbol symbol)
+        {
+            try { 
                 // Создайте таймер с указанной периодичностью
                 TimerCallback tm = new TimerCallback(CheckCollisionsType);
                 // создаем таймер
                 Timer timer = new Timer(tm, symbol, 0, 1);
                 // Запускаем бесконечный цикл для перемещения объекта Stone
-                while (true)
+                while (isRunning)
                 {
+                    if (!isRunning) {
+                        timer.Dispose();
+                        break; 
+                    }
+                        // Если флаг isRunning равен false, приостановите поток
+                        while (!Pause)
+                        {
+                            Monitor.Wait(this);
+                        }
                     // Перемещаем объект Stone
                     MoveSymbol(symbol);
 
@@ -141,6 +173,7 @@ namespace лаба_3
             {
                 symbols.Add(symbol);
                 Controls.Add(symbol);
+                controlsToRemove.Add(symbol);
             }
         }
 
@@ -186,7 +219,9 @@ namespace лаба_3
         {
             try
             {
-                Symbol symbol = symbols[symbols.IndexOf((Symbol)symbolobj)];
+                if (!isRunning) return;
+                if (symbols.Count == 0) return;
+                Symbol symbol = (Symbol)symbolobj;
                 if (InvokeRequired)
                 {
                     Invoke(new Action<Symbol>(CheckCollisionsType), symbol);
@@ -199,8 +234,8 @@ namespace лаба_3
                         {
                             if (otherSymbol != symbol && symbol.Bounds.IntersectsWith(otherSymbol.Bounds))
                             {
-                                //ChangeType(symbol, otherSymbol);
-                                otherSymbol.ChangeType(symbol);
+                                ChangeType(symbol, otherSymbol);
+                               // otherSymbol.ChangeType(symbol);
                             }
                         }
                     }
@@ -208,6 +243,11 @@ namespace лаба_3
             } catch (ObjectDisposedException exc)
             {
                 Console.WriteLine("Error: " + exc.Message);
+            }
+            catch (ArgumentOutOfRangeException argexc)
+            {
+                Console.WriteLine("Error: " + argexc.Message);
+                return;
             }
         }
 
@@ -238,15 +278,25 @@ namespace лаба_3
 
         private void stop_Click(object sender, EventArgs e)
         {
-            lock (lockObject)
+            // Инвертируйте состояние isRunning при каждом нажатии кнопки
+            Pause = !Pause;
+
+            // Если поток должен быть остановлен, выведите сообщение или выполните другую необходимую логику
+            if (!Pause)
             {
-                foreach (Thread thread in threads)
-                {
-                    thread.Interrupt();
-                }
+                Console.WriteLine("Поток остановлен.");
+            }
+            // Если поток должен быть возобновлен, выведите сообщение или выполните другую необходимую логику
+            else
+            {
+                Console.WriteLine("Поток возобновлен.");
+
+                // Если поток должен быть возобновлен, уведомите основной поток
+
+                    Monitor.Pulse(this);
+
             }
         }
-
 
         public void ChangeType(Symbol symbol, Symbol otherSymbol)
         {
@@ -264,7 +314,7 @@ namespace лаба_3
                 {
                     //Image = Properties.Resources.paper3;
                     symbol.clearImage();
-                    symbol.getImage(Properties.Resources.paper3);
+                    symbol.getImage(Properties.Resources.бумага3);
                     symbol.setType(1);
                 }
                 if (symbol.getType() == 3 && otherSymbol.getType() == 2)
@@ -285,7 +335,7 @@ namespace лаба_3
                 {
                     //Image = Properties.Resources.paper3;
                     otherSymbol.clearImage();
-                    otherSymbol.getImage(Properties.Resources.paper3);
+                    otherSymbol.getImage(Properties.Resources.бумага3);
                     otherSymbol.setType(1);
                 }
                 if (symbol.getType() == 2 && otherSymbol.getType() == 3)
@@ -298,5 +348,28 @@ namespace лаба_3
             }
         }
 
+        private void abort_Click(object sender, EventArgs e)
+        {
+            isRunning = false;
+            RemoveControlsFromUI();
+            threads.Clear();
+        }
+        private void RemoveControlsFromUI()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(RemoveControlsFromUI));
+                return;
+            }
+
+            foreach (Symbol symbol in controlsToRemove)
+            {
+                symbols.Remove(symbol);
+                Controls.Remove(symbol);
+                symbol.Dispose();
+            }
+
+            controlsToRemove.Clear();
+        }
     }
 }
