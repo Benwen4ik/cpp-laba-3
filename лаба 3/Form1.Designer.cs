@@ -29,11 +29,10 @@ namespace лаба_3
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.start = new System.Windows.Forms.Button();
+            this.stop = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
@@ -53,16 +52,27 @@ namespace лаба_3
             this.start.Name = "start";
             this.start.Size = new System.Drawing.Size(94, 29);
             this.start.TabIndex = 0;
-            this.start.Text = "button1";
+            this.start.Text = "start";
             this.start.UseVisualStyleBackColor = true;
             this.start.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // stop
+            // 
+            this.stop.Location = new System.Drawing.Point(123, 13);
+            this.stop.Name = "stop";
+            this.stop.Size = new System.Drawing.Size(94, 29);
+            this.stop.TabIndex = 1;
+            this.stop.Text = "Stop";
+            this.stop.UseVisualStyleBackColor = true;
+            this.stop.Click += new System.EventHandler(this.stop_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.ClientSize = new System.Drawing.Size(1016, 516);
+            this.Controls.Add(this.stop);
             this.Controls.Add(this.start);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -73,8 +83,8 @@ namespace лаба_3
 
         #endregion
         private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button start;
+        private System.Windows.Forms.Button stop;
     }
 }
 
