@@ -40,37 +40,69 @@ namespace лаба_3
 
         private void button1_Click(object sender, EventArgs e)
         {
-            isRunning = true;
-            NumStones = Convert.ToInt32(stonecount.Text);
-            NumScissors = Convert.ToInt32(scissorscount.Text);
-            NumPaper = Convert.ToInt32(papercount.Text);
-            if (threads.Count == 0)
+            try
             {
-                // Создаем потоки для создания и размещения объектов Stone
-                for (int i = 0; i < NumStones; i++)
+                isRunning = true;
+                NumStones = Convert.ToInt32(stonecount.Text);
+                if (NumStones < 0 || NumStones > 15)
                 {
-                    Thread thread = new Thread(CreateSymbol);
-                    threads.Add(thread);
-                    thread.Start(2);
+                    MessageBox.Show("Элементов должно быть от 0 до 15");
+                    NumStones = 3;
+                    stonecount.Text = "3";
                 }
-                for (int i = 0; i < NumPaper; i++)
+                NumScissors = Convert.ToInt32(scissorscount.Text);
+                if (NumScissors < 0 || NumScissors > 15)
                 {
-                    Thread thread = new Thread(CreateSymbol);
-                    threads.Add(thread);
-                    thread.Start(1);
+                    MessageBox.Show("Элементов должно быть от 0 до 15");
+                    NumScissors = 3;
+                    scissorscount.Text = "3";
                 }
-                for (int i = 0; i < NumScissors; i++)
+                NumPaper = Convert.ToInt32(papercount.Text);
+                if (NumPaper < 0 || NumPaper > 15)
                 {
-                    Thread thread = new Thread(CreateSymbol);
-                    threads.Add(thread);
-                    thread.Start(3);
+                    MessageBox.Show("Элементов должно быть от 0 до 15");
+                    NumPaper = 3;
+                    papercount.Text = "3";
                 }
-            } else
+                if (threads.Count == 0)
+                {
+                    // Создаем потоки для создания и размещения объектов Stone
+                    for (int i = 0; i < NumStones; i++)
+                    {
+                        Thread thread = new Thread(CreateSymbol);
+                        threads.Add(thread);
+                        thread.Start(2);
+                    }
+                    for (int i = 0; i < NumPaper; i++)
+                    {
+                        Thread thread = new Thread(CreateSymbol);
+                        threads.Add(thread);
+                        thread.Start(1);
+                    }
+                    for (int i = 0; i < NumScissors; i++)
+                    {
+                        Thread thread = new Thread(CreateSymbol);
+                        threads.Add(thread);
+                        thread.Start(3);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < threads.Count; i++)
+                    {
+                        //threads[i].Start() ;
+                    }
+                }
+            } catch (FormatException fe)
             {
-                for (int i=0; i< threads.Count; i++)
-                {
-                    //threads[i].Start() ;
-                }
+                MessageBox.Show("Error: " + fe.Message);
+                scissorscount.Text = "3";
+                stonecount.Text = "3";
+                papercount.Text = "3";
+            }
+            catch (Exception exp1)
+            {
+                MessageBox.Show("Error: " + exp1.Message);
             }
         }
 
@@ -81,18 +113,16 @@ namespace лаба_3
                 // Создаем новый объект Stone
                 Symbol symbol = new Symbol((int)type);
                 // Генерируем случайные координаты для объекта Stone
-                int x = random.Next(Width - 2 * symbol.Width);
-                int y = random.Next(Height - 2 * symbol.Height);
+                int x = random.Next(20,Width - 2 * symbol.Width);
+                int y = random.Next(70,Height - 2 * symbol.Height);
 
                 // Проверяем, нет ли других объектов Stone вблизи сгенерированных координат
                 while (HasCollision(symbols, x, y))
                 {
-                    x = random.Next(Width - 2 * symbol.Width);
-                    y = random.Next(Height - 2 * symbol.Height);
+                    x = random.Next(20,Width - 2 * symbol.Width);
+                    y = random.Next(70,Height - 2 * symbol.Height);
                 }
                 // Генерируем случайное направление движения
-                //   int dx = random.Next(-MaxSpeed, MaxSpeed + 1);
-                //   int dy = random.Next(-MaxSpeed, MaxSpeed + 1);
                 symbol.setDx(random.Next(-MaxSpeed, MaxSpeed + 1));
                 symbol.setDy(random.Next(-MaxSpeed, MaxSpeed + 1));
                 // Размещаем объект Stone на форме
@@ -113,7 +143,11 @@ namespace лаба_3
                 // Создайте таймер с указанной периодичностью
                 TimerCallback tm = new TimerCallback(CheckCollisionsType);
                 // создаем таймер
-                Timer timer = new Timer(tm, symbol, 0, 1);
+                Timer timer = new Timer(tm, symbol, 1000, 10);
+
+               // TimerCallback collis = new TimerCallback(CheckCollisions);
+                // создаем таймер
+              //  Timer timerCollis = new Timer(collis, symbol, 0, 100);
                 // Запускаем бесконечный цикл для перемещения объекта Stone
                 while (isRunning)
                 {
@@ -121,22 +155,21 @@ namespace лаба_3
                         timer.Dispose();
                         break; 
                     }
-                        // Если флаг isRunning равен false, приостановите поток
-                        while (!Pause)
-                        {
-                            Monitor.Wait(this);
-                        }
+                    while (!Pause)
+                    {
+                         Thread.Sleep(500);
+                    }
                     // Перемещаем объект Stone
                     MoveSymbol(symbol);
 
                     // Проверяем, достиг ли объект Stone границы формы
-                    if (symbol.Left <= 0 || symbol.Right >= ClientSize.Width)
+                    if (symbol.Left <= 5 || symbol.Right >= (ClientSize.Width-10))
                     {
                         // dx = -dx; // Изменяем направление движения по оси X
                         symbol.setDx(-symbol.getDx());
                     }
 
-                    if (symbol.Top <= 0 || symbol.Bottom >= ClientSize.Height)
+                    if (symbol.Top <= 50 || symbol.Bottom >= (ClientSize.Height-10))
                     {
                         //  dy = -dy; // Изменяем направление движения по оси Y
                         symbol.setDy(-symbol.getDy());
@@ -147,7 +180,6 @@ namespace лаба_3
                     // Приостанавливаем поток на некоторое время
                     Thread.Sleep(100);
                 }
-                // Создайте таймер с указанной периодичностью
             } catch (ObjectDisposedException e)
             {
                 Console.WriteLine("Error " + e.Message);
@@ -197,22 +229,24 @@ namespace лаба_3
 
         private void CheckCollisions(object symbolobj)
         {
-            lock (lockObject)
-            {
-                Symbol symbol = symbols[symbols.IndexOf((Symbol)symbolobj)];
+                Symbol symbol = (Symbol)symbolobj;
                 foreach (Symbol otherSymbol in symbols)
                 {
                     if (otherSymbol != symbol && symbol.Bounds.IntersectsWith(otherSymbol.Bounds))
                     {
                         // Обнаружено столкновение
-                        Point collisionPoint = GetCollisionPoint(symbol, otherSymbol);
-                        symbol.ChangeDirection(collisionPoint);
-                        otherSymbol.ChangeDirection(collisionPoint);
-                        //ChangeType(symbol,otherSymbol);
-                        // otherSymbol.ChangeType(symbol);
-                    }
+                       // Point collisionPoint = GetCollisionPoint(symbol, otherSymbol);
+                    //symbol.ChangeDirection(collisionPoint);
+                    //otherSymbol.ChangeDirection(collisionPoint);
+                    symbol.setDx(-symbol.getDx());
+                    symbol.setDy(-symbol.getDy());
+                    otherSymbol.setDx(-symbol.getDx());
+                    otherSymbol.setDy(-symbol.getDy());
+                    //ChangeType(symbol,otherSymbol);
+                    // otherSymbol.ChangeType(symbol);
                 }
-            }
+                }
+
         }
 
         private void CheckCollisionsType(object symbolobj)
@@ -278,24 +312,7 @@ namespace лаба_3
 
         private void stop_Click(object sender, EventArgs e)
         {
-            // Инвертируйте состояние isRunning при каждом нажатии кнопки
             Pause = !Pause;
-
-            // Если поток должен быть остановлен, выведите сообщение или выполните другую необходимую логику
-            if (!Pause)
-            {
-                Console.WriteLine("Поток остановлен.");
-            }
-            // Если поток должен быть возобновлен, выведите сообщение или выполните другую необходимую логику
-            else
-            {
-                Console.WriteLine("Поток возобновлен.");
-
-                // Если поток должен быть возобновлен, уведомите основной поток
-
-                    Monitor.Pulse(this);
-
-            }
         }
 
         public void ChangeType(Symbol symbol, Symbol otherSymbol)

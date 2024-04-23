@@ -60,8 +60,8 @@ namespace лаба_3
 
             // Нормализуем вектор направления
             double magnitude = Math.Sqrt(dx * dx + dy * dy);
-            dx1 = (int)Math.Round(MaxSpeed * dx / magnitude);
-            dy1 = (int)Math.Round(MaxSpeed * dy / magnitude);
+         //   dx1 = (int)Math.Round(MaxSpeed * dx / magnitude);
+         //   dy1 = (int)Math.Round(MaxSpeed * dy / magnitude);
 
             // Изменяем направление движения объекта Stone
             //Left += dx1;

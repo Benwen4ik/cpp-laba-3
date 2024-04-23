@@ -69,27 +69,27 @@ namespace лаба_3
             this.stop.Name = "stop";
             this.stop.Size = new System.Drawing.Size(94, 29);
             this.stop.TabIndex = 1;
-            this.stop.Text = "Stop";
+            this.stop.Text = "Pause";
             this.stop.UseVisualStyleBackColor = true;
             this.stop.Click += new System.EventHandler(this.stop_Click);
             // 
             // stonecount
             // 
-            this.stonecount.Location = new System.Drawing.Point(276, 14);
+            this.stonecount.Location = new System.Drawing.Point(403, 15);
             this.stonecount.Name = "stonecount";
             this.stonecount.Size = new System.Drawing.Size(39, 27);
             this.stonecount.TabIndex = 2;
             // 
             // papercount
             // 
-            this.papercount.Location = new System.Drawing.Point(373, 14);
+            this.papercount.Location = new System.Drawing.Point(514, 14);
             this.papercount.Name = "papercount";
             this.papercount.Size = new System.Drawing.Size(41, 27);
             this.papercount.TabIndex = 3;
             // 
             // scissorscount
             // 
-            this.scissorscount.Location = new System.Drawing.Point(495, 15);
+            this.scissorscount.Location = new System.Drawing.Point(642, 15);
             this.scissorscount.Name = "scissorscount";
             this.scissorscount.Size = new System.Drawing.Size(44, 27);
             this.scissorscount.TabIndex = 4;
@@ -97,7 +97,7 @@ namespace лаба_3
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(223, 17);
+            this.label1.Location = new System.Drawing.Point(350, 17);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(47, 20);
             this.label1.TabIndex = 5;
@@ -106,7 +106,7 @@ namespace лаба_3
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(321, 18);
+            this.label2.Location = new System.Drawing.Point(462, 17);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(46, 20);
             this.label2.TabIndex = 6;
@@ -115,7 +115,7 @@ namespace лаба_3
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(420, 17);
+            this.label3.Location = new System.Drawing.Point(576, 17);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(60, 20);
             this.label3.TabIndex = 7;
@@ -123,7 +123,7 @@ namespace лаба_3
             // 
             // abort
             // 
-            this.abort.Location = new System.Drawing.Point(581, 14);
+            this.abort.Location = new System.Drawing.Point(232, 13);
             this.abort.Name = "abort";
             this.abort.Size = new System.Drawing.Size(94, 29);
             this.abort.TabIndex = 8;
