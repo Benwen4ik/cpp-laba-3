@@ -18,7 +18,7 @@ namespace лаба_3
         private int NumStones = 3; // Количество объектов Stone для создания
         private int NumPaper = 3;
         private int NumScissors = 3;
-        private const int MaxSpeed = 5;
+        private int MaxSpeed = 5;
         private const int MinDistance = 50;
         private readonly Random random = new Random();
         List<Symbol> controlsToRemove = new List<Symbol>();
@@ -34,6 +34,7 @@ namespace лаба_3
             stonecount.Text = "3";
             papercount.Text = "3";
             scissorscount.Text = "3";
+            speedbox.Text = "5";
         }
 
 
@@ -63,6 +64,13 @@ namespace лаба_3
                     MessageBox.Show("Элементов должно быть от 0 до 15");
                     NumPaper = 3;
                     papercount.Text = "3";
+                }
+                MaxSpeed = Convert.ToInt32(speedbox.Text);
+                if (MaxSpeed < 1 || MaxSpeed > 15)
+                {
+                    MessageBox.Show("Скорость должна быть от 1 до 15");
+                    MaxSpeed = 5;
+                    speedbox.Text = "5";
                 }
                 if (threads.Count == 0)
                 {
@@ -135,6 +143,25 @@ namespace лаба_3
             }
         }
 
+        private void SelectWin()
+        {
+            if (NumStones ==0 && NumScissors ==0)
+            {
+                isRunning = false;
+                MessageBox.Show("Paper win");
+            }
+            if (NumStones ==0 && NumPaper == 0)
+            {
+                isRunning = false;
+                MessageBox.Show("Scissors win");
+            }
+            if (NumPaper == 0 && NumScissors == 0)
+            {
+                isRunning = false;
+                MessageBox.Show("Stone win");
+            }
+        }
+
 
 
         private void CycleMoveSymbol(Symbol symbol)
@@ -145,9 +172,9 @@ namespace лаба_3
                 // создаем таймер
                 Timer timer = new Timer(tm, symbol, 1000, 10);
 
-               // TimerCallback collis = new TimerCallback(CheckCollisions);
+                // TimerCallback collis = new TimerCallback(CheckCollisions);
                 // создаем таймер
-              //  Timer timerCollis = new Timer(collis, symbol, 0, 100);
+                //  Timer timerCollis = new Timer(collis, symbol, 0, 100);
                 // Запускаем бесконечный цикл для перемещения объекта Stone
                 while (isRunning)
                 {
@@ -177,6 +204,8 @@ namespace лаба_3
 
                     // Проверяем столкновения с другими объектами Stone
                     CheckCollisions(symbol);
+                    //i/f (NumStones == 0 || NumScissors == 0 || NumPaper == 0)
+                    //SelectWin();
                     // Приостанавливаем поток на некоторое время
                     Thread.Sleep(100);
                 }
@@ -326,6 +355,8 @@ namespace лаба_3
                     symbol.clearImage();
                     symbol.getImage(Properties.Resources.ножницы);
                     symbol.setType(3);
+                    NumPaper--;
+                    NumScissors++;
                 }
                 if (symbol.getType() == 2 && otherSymbol.getType() == 1)
                 {
@@ -333,12 +364,16 @@ namespace лаба_3
                     symbol.clearImage();
                     symbol.getImage(Properties.Resources.бумага3);
                     symbol.setType(1);
+                    NumStones--;
+                    NumPaper++;
                 }
                 if (symbol.getType() == 3 && otherSymbol.getType() == 2)
                 {
                     symbol.clearImage();
                     symbol.getImage(Properties.Resources.камень);
                     symbol.setType(2);
+                    NumScissors--;
+                    NumStones++;
                 }
                 //
                 if (symbol.getType() == 3 && otherSymbol.getType() == 1)
@@ -347,6 +382,8 @@ namespace лаба_3
                     otherSymbol.clearImage();
                     otherSymbol.getImage(Properties.Resources.ножницы);
                     otherSymbol.setType(3);
+                    NumPaper--;
+                    NumScissors++;
                 }
                 if (symbol.getType() == 1 && otherSymbol.getType() == 2)
                 {
@@ -354,12 +391,16 @@ namespace лаба_3
                     otherSymbol.clearImage();
                     otherSymbol.getImage(Properties.Resources.бумага3);
                     otherSymbol.setType(1);
+                    NumStones--;
+                    NumPaper++;
                 }
                 if (symbol.getType() == 2 && otherSymbol.getType() == 3)
                 {
                     otherSymbol.clearImage();
                     otherSymbol.getImage(Properties.Resources.камень);
                     otherSymbol.setType(2);
+                    NumScissors--;
+                    NumStones++;
                 }
                 return;
             }

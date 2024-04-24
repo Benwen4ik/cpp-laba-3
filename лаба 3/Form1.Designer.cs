@@ -40,6 +40,8 @@ namespace лаба_3
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.abort = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.speedbox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
@@ -65,11 +67,11 @@ namespace лаба_3
             // 
             // stop
             // 
-            this.stop.Location = new System.Drawing.Point(123, 13);
+            this.stop.Location = new System.Drawing.Point(113, 13);
             this.stop.Name = "stop";
-            this.stop.Size = new System.Drawing.Size(94, 29);
+            this.stop.Size = new System.Drawing.Size(114, 29);
             this.stop.TabIndex = 1;
-            this.stop.Text = "Pause";
+            this.stop.Text = "Pause/Resume";
             this.stop.UseVisualStyleBackColor = true;
             this.stop.Click += new System.EventHandler(this.stop_Click);
             // 
@@ -131,12 +133,30 @@ namespace лаба_3
             this.abort.UseVisualStyleBackColor = true;
             this.abort.Click += new System.EventHandler(this.abort_Click);
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(692, 18);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(79, 20);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "MaxSpeed";
+            // 
+            // speedbox
+            // 
+            this.speedbox.Location = new System.Drawing.Point(772, 15);
+            this.speedbox.Name = "speedbox";
+            this.speedbox.Size = new System.Drawing.Size(44, 27);
+            this.speedbox.TabIndex = 10;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.ClientSize = new System.Drawing.Size(1016, 516);
+            this.Controls.Add(this.speedbox);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.abort);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -165,6 +185,8 @@ namespace лаба_3
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button abort;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox speedbox;
     }
 }
 
