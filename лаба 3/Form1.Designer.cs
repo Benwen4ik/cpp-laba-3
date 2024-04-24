@@ -167,7 +167,7 @@ namespace лаба_3
             this.Controls.Add(this.stop);
             this.Controls.Add(this.start);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "зонби дабалатория v 2.0;";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
