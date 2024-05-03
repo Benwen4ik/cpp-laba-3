@@ -23,6 +23,7 @@ namespace лаба_3
         private readonly Random random = new Random();
         List<Symbol> controlsToRemove = new List<Symbol>();
         private readonly object lockObject = new object();
+       // private readonly object lockObject2 = new object();
         private readonly List<Symbol> symbols = new List<Symbol>();
        // private List<Point> coordinates = new List<Point>();
         private List<Thread> threads = new List<Thread>();
@@ -74,31 +75,32 @@ namespace лаба_3
                 }
                 if (threads.Count == 0)
                 {
+                    if ((NumPaper + NumScissors + NumStones) > 20 && (ClientSize.Width < 1000 || ClientSize.Height < 1000))
+                    {
+                        MessageBox.Show("Элементов слишко много для маленького окна. Откройте полноэкранный режим");
+                        return;
+                    }
                     // Создаем потоки для создания и размещения объектов Stone
                     for (int i = 0; i < NumStones; i++)
                     {
                         Thread thread = new Thread(CreateSymbol);
                         threads.Add(thread);
+                        thread.Name = "stone" + i;
                         thread.Start(2);
                     }
                     for (int i = 0; i < NumPaper; i++)
                     {
                         Thread thread = new Thread(CreateSymbol);
                         threads.Add(thread);
+                        thread.Name = "paper" + i;
                         thread.Start(1);
                     }
                     for (int i = 0; i < NumScissors; i++)
                     {
                         Thread thread = new Thread(CreateSymbol);
                         threads.Add(thread);
+                        thread.Name = "scissors" + i;
                         thread.Start(3);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < threads.Count; i++)
-                    {
-                        //threads[i].Start() ;
                     }
                 }
             } catch (FormatException fe)
@@ -125,16 +127,31 @@ namespace лаба_3
                 int y = random.Next(70,Height - 2 * symbol.Height);
 
                 // Проверяем, нет ли других объектов Stone вблизи сгенерированных координат
-                while (HasCollision(symbols, x, y))
+                bool hasCollision = true;
+
+                while (hasCollision)
                 {
-                    x = random.Next(20,Width - 2 * symbol.Width);
-                    y = random.Next(70,Height - 2 * symbol.Height);
+                    x = random.Next(20, Width - 2 * symbol.Width);
+                    y = random.Next(70, Height - 2 * symbol.Height);
+
+                    Monitor.Enter(lockObject);
+
+                    try
+                    {
+                        hasCollision = HasCollision(symbols, x, y);
+                        if (!hasCollision)
+                        {
+                            symbol.setDx(random.Next(-MaxSpeed, MaxSpeed + 1));
+                            symbol.setDy(random.Next(-MaxSpeed, MaxSpeed + 1));
+                            symbol.Location = new System.Drawing.Point(x, y);
+                            symbols.Add(symbol);
+                        }
+                    }
+                    finally
+                    {
+                        Monitor.Exit(lockObject);
+                    }
                 }
-                // Генерируем случайное направление движения
-                symbol.setDx(random.Next(-MaxSpeed, MaxSpeed + 1));
-                symbol.setDy(random.Next(-MaxSpeed, MaxSpeed + 1));
-                // Размещаем объект Stone на форме
-                symbol.Location = new System.Drawing.Point(x, y);
                 AddSymbol(symbol);
                 CycleMoveSymbol(symbol);
             } catch (Exception e)
@@ -171,19 +188,27 @@ namespace лаба_3
                 TimerCallback tm = new TimerCallback(CheckCollisionsType);
                 // создаем таймер
                 Timer timer = new Timer(tm, symbol, 1000, 10);
-
+                
                 // TimerCallback collis = new TimerCallback(CheckCollisions);
                 // создаем таймер
                 //  Timer timerCollis = new Timer(collis, symbol, 0, 100);
                 // Запускаем бесконечный цикл для перемещения объекта Stone
                 while (isRunning)
                 {
-                    if (!isRunning) {
+                    if (!isRunning)
+                    {
                         timer.Dispose();
-                        break; 
+                        //break;
+                        return;
                     }
                     while (!Pause)
                     {
+                        if (!isRunning)
+                        {
+                            timer.Dispose();
+                            //break;
+                            return;
+                        }
                          Thread.Sleep(500);
                     }
                     // Перемещаем объект Stone
@@ -204,23 +229,26 @@ namespace лаба_3
 
                     // Проверяем столкновения с другими объектами Stone
                     CheckCollisions(symbol);
+                    //CheckCollisionsType(symbol);
                     //i/f (NumStones == 0 || NumScissors == 0 || NumPaper == 0)
                     //SelectWin();
                     // Приостанавливаем поток на некоторое время
                     Thread.Sleep(100);
                 }
+                timer.Dispose();
             } catch (ObjectDisposedException e)
             {
-                Console.WriteLine("Error " + e.Message);
+                MessageBox.Show("Error " + e.Message);
             }
             catch(NullReferenceException ex)
             {
-                Console.WriteLine("Error " + ex.Message);
+                MessageBox.Show("Error " + ex.Message);
             }
             catch (Exception exp)
             {
-                Console.WriteLine("Error " + exp.Message);
+                MessageBox.Show("Error " + exp.Message);
             }
+            
         }
 
         private void AddSymbol(Symbol symbol)
@@ -232,7 +260,7 @@ namespace лаба_3
             }
             else
             {
-                symbols.Add(symbol);
+              //  symbols.Add(symbol);
                 Controls.Add(symbol);
                 controlsToRemove.Add(symbol);
             }
@@ -258,24 +286,23 @@ namespace лаба_3
 
         private void CheckCollisions(object symbolobj)
         {
-                Symbol symbol = (Symbol)symbolobj;
+            Symbol symbol = (Symbol)symbolobj;
                 foreach (Symbol otherSymbol in symbols)
                 {
                     if (otherSymbol != symbol && symbol.Bounds.IntersectsWith(otherSymbol.Bounds))
                     {
                         // Обнаружено столкновение
-                       // Point collisionPoint = GetCollisionPoint(symbol, otherSymbol);
-                    //symbol.ChangeDirection(collisionPoint);
-                    //otherSymbol.ChangeDirection(collisionPoint);
-                    symbol.setDx(-symbol.getDx());
-                    symbol.setDy(-symbol.getDy());
-                    otherSymbol.setDx(-symbol.getDx());
-                    otherSymbol.setDy(-symbol.getDy());
-                    //ChangeType(symbol,otherSymbol);
-                    // otherSymbol.ChangeType(symbol);
+                        // Point collisionPoint = GetCollisionPoint(symbol, otherSymbol);
+                        //symbol.ChangeDirection(collisionPoint);
+                        //otherSymbol.ChangeDirection(collisionPoint);
+                        symbol.setDx(-symbol.getDx());
+                        symbol.setDy(-symbol.getDy());
+                        otherSymbol.setDx(-symbol.getDx());
+                        otherSymbol.setDy(-symbol.getDy());
+                        //ChangeType(symbol,otherSymbol);
+                        // otherSymbol.ChangeType(symbol);
+                    }
                 }
-                }
-
         }
 
         private void CheckCollisionsType(object symbolobj)
@@ -284,6 +311,7 @@ namespace лаба_3
             {
                 if (!isRunning) return;
                 if (symbols.Count == 0) return;
+              //  if (!Pause) return;
                 Symbol symbol = (Symbol)symbolobj;
                 if (InvokeRequired)
                 {
@@ -291,17 +319,14 @@ namespace лаба_3
                 }
                 else
                 {
-                    lock (lockObject)
-                    {
                         foreach (Symbol otherSymbol in symbols)
                         {
                             if (otherSymbol != symbol && symbol.Bounds.IntersectsWith(otherSymbol.Bounds))
                             {
                                 ChangeType(symbol, otherSymbol);
-                               // otherSymbol.ChangeType(symbol);
+                                // otherSymbol.ChangeType(symbol);
                             }
                         }
-                    }
                 }
             } catch (ObjectDisposedException exc)
             {
@@ -310,7 +335,10 @@ namespace лаба_3
             catch (ArgumentOutOfRangeException argexc)
             {
                 Console.WriteLine("Error: " + argexc.Message);
-                return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error " + ex.Message);
             }
         }
 
@@ -408,9 +436,12 @@ namespace лаба_3
 
         private void abort_Click(object sender, EventArgs e)
         {
+            Pause = !Pause;
             isRunning = false;
             RemoveControlsFromUI();
             threads.Clear();
+            Pause = !Pause;
+           
         }
         private void RemoveControlsFromUI()
         {
@@ -419,15 +450,19 @@ namespace лаба_3
                 Invoke(new Action(RemoveControlsFromUI));
                 return;
             }
-
-            foreach (Symbol symbol in controlsToRemove)
+            lock (lockObject)
             {
-                symbols.Remove(symbol);
-                Controls.Remove(symbol);
-                symbol.Dispose();
-            }
+                List<Symbol> symbolsToRemove = new List<Symbol>(controlsToRemove);
 
-            controlsToRemove.Clear();
+                foreach (Symbol symbol in symbolsToRemove)
+                {
+                    symbols.Remove(symbol);
+                    Controls.Remove(symbol);
+                    symbol.Dispose();
+                }
+                
+                controlsToRemove.RemoveAll(symbolsToRemove.Contains);
+            }
         }
     }
 }
