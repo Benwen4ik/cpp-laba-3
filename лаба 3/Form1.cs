@@ -187,7 +187,7 @@ namespace лаба_3
                 // Создайте таймер с указанной периодичностью
                 TimerCallback tm = new TimerCallback(CheckCollisionsType);
                 // создаем таймер
-                Timer timer = new Timer(tm, symbol, 1000, 10);
+               // Timer timer = new Timer(tm, symbol, 1000, 10);
                 
                 // TimerCallback collis = new TimerCallback(CheckCollisions);
                 // создаем таймер
@@ -197,7 +197,7 @@ namespace лаба_3
                 {
                     if (!isRunning)
                     {
-                        timer.Dispose();
+                       // timer.Dispose();
                         //break;
                         return;
                     }
@@ -205,7 +205,7 @@ namespace лаба_3
                     {
                         if (!isRunning)
                         {
-                            timer.Dispose();
+                          //  timer.Dispose();
                             //break;
                             return;
                         }
@@ -235,7 +235,7 @@ namespace лаба_3
                     // Приостанавливаем поток на некоторое время
                     Thread.Sleep(100);
                 }
-                timer.Dispose();
+              //  timer.Dispose();
             } catch (ObjectDisposedException e)
             {
                 MessageBox.Show("Error " + e.Message);
@@ -299,6 +299,18 @@ namespace лаба_3
                         symbol.setDy(-symbol.getDy());
                         otherSymbol.setDx(-symbol.getDx());
                         otherSymbol.setDy(-symbol.getDy());
+
+                        symbol.setTime(  DateTime.Now);
+                        otherSymbol.setTime(DateTime.Now); 
+
+                    if (DateTime.Now - symbol.getTime() > TimeSpan.FromSeconds(0.5))
+                    {
+                        symbol.setDx(-symbol.getDx());
+                        symbol.setDy(-symbol.getDy());
+                        symbol.setTime(DateTime.MinValue);
+                    }
+
+                    CheckCollisionsType(symbol);
                         //ChangeType(symbol,otherSymbol);
                         // otherSymbol.ChangeType(symbol);
                     }

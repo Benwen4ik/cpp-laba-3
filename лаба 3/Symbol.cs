@@ -16,6 +16,8 @@ namespace лаба_3
         private int dx;
         private int dy;
 
+        private DateTime lastCollisionTime;
+
         private readonly object lockObject = new object();
         public Symbol()
         {
@@ -137,6 +139,16 @@ namespace лаба_3
         public void setType(int type)
         {
             this.type = type;
+        }
+        
+        public DateTime getTime()
+        {
+            return lastCollisionTime;
+        }
+
+        public void setTime(DateTime date)
+        {
+            lastCollisionTime = date;
         }
     }
 }
