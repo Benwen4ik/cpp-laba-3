@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -29,6 +31,34 @@ namespace лаба_3
         private List<Thread> threads = new List<Thread>();
         private bool Pause = true;
         private volatile bool isRunning = true;
+        string jsonfile = @"score.json";
+
+        class Users
+        {
+            public string user;
+            public int CountWin;
+            public int CountLose;
+            public Users(string str, int w, int l)
+            {
+                user = str;
+                CountWin = w;
+                CountLose = l;
+            }
+            public void getWin ()
+            {
+                CountWin ++;
+            }
+            public void getLose()
+            {
+               CountLose ++;
+            }
+        };
+
+       // int CountWin = 0;
+       // int CountLose = 0;
+        List<Users> listUsers = new List<Users> { };
+
+
         public Form1()
         {
             InitializeComponent();
@@ -36,6 +66,13 @@ namespace лаба_3
             papercount.Text = "3";
             scissorscount.Text = "3";
             speedbox.Text = "5";
+            winComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            winComboBox.Items.Add("Stone");
+            winComboBox.Items.Add("Paper");
+            winComboBox.Items.Add("Scissors");
+            string jsonstring = File.ReadAllText(jsonfile);
+            listUsers = JsonConvert.DeserializeObject<List<Users>>(jsonstring);
+            changeLabel();
         }
 
 
@@ -80,13 +117,13 @@ namespace лаба_3
                         MessageBox.Show("Элементов слишко много для маленького окна. Откройте полноэкранный режим");
                         return;
                     }
-                    // Создаем потоки для создания и размещения объектов Stone
                     for (int i = 0; i < NumStones; i++)
                     {
                         Thread thread = new Thread(CreateSymbol);
                         threads.Add(thread);
                         thread.Name = "stone" + i;
                         thread.Start(2);
+                     //   thread.Join();
                     }
                     for (int i = 0; i < NumPaper; i++)
                     {
@@ -94,15 +131,19 @@ namespace лаба_3
                         threads.Add(thread);
                         thread.Name = "paper" + i;
                         thread.Start(1);
+                     //   thread.Join();
                     }
                     for (int i = 0; i < NumScissors; i++)
-                    {
+                    {   
                         Thread thread = new Thread(CreateSymbol);
                         threads.Add(thread);
                         thread.Name = "scissors" + i;
                         thread.Start(3);
+                    //    thread.Join();
                     }
+                    SelectWinAsync();
                 }
+
             } catch (FormatException fe)
             {
                 MessageBox.Show("Error: " + fe.Message);
@@ -116,17 +157,14 @@ namespace лаба_3
             }
         }
 
-        private void CreateSymbol (object type)
+        private  void CreateSymbol (object type)
         {
             try
             {
-                // Создаем новый объект Stone
                 Symbol symbol = new Symbol((int)type);
-                // Генерируем случайные координаты для объекта Stone
                 int x = random.Next(20,Width - 2 * symbol.Width);
                 int y = random.Next(70,Height - 2 * symbol.Height);
 
-                // Проверяем, нет ли других объектов Stone вблизи сгенерированных координат
                 bool hasCollision = true;
 
                 while (hasCollision)
@@ -160,39 +198,94 @@ namespace лаба_3
             }
         }
 
-        private void SelectWin()
+        private async Task SelectWinAsync()
         {
-            if (NumStones ==0 && NumScissors ==0)
+            while (isRunning)
             {
-                isRunning = false;
-                MessageBox.Show("Paper win");
+                if (NumStones == 0 && NumScissors == 0)
+                {
+                    if (!foundUser(UserText.Text))
+                        listUsers.Add(new Users(UserText.Text,0, 0));
+                    isRunning = false;
+                    MessageBox.Show("Paper win");
+                    getScore(1);
+                    changeLabel();
+                }
+                if (NumStones == 0 && NumPaper == 0)
+                {
+                    if (!foundUser(UserText.Text))
+                        listUsers.Add(new Users(UserText.Text, 0, 0));
+                    isRunning = false;
+                    MessageBox.Show("Scissors win");
+                    getScore(2);
+                    changeLabel();
+                }
+                if (NumPaper == 0 && NumScissors == 0)
+                {
+                    if (!foundUser(UserText.Text))
+                        listUsers.Add(new Users(UserText.Text, 0, 0));
+                    isRunning = false;
+                    MessageBox.Show("Stone win");
+                    getScore(0);
+                    changeLabel();
+                }
+                await Task.Delay(100);
             }
-            if (NumStones ==0 && NumPaper == 0)
+        }
+
+        private bool foundUser(string name)
+        {
+            foreach(Users user in listUsers)
             {
-                isRunning = false;
-                MessageBox.Show("Scissors win");
+                if (user.user == name) return true;
             }
-            if (NumPaper == 0 && NumScissors == 0)
+            return false;
+        }
+
+        private void getScore(int a)
+        {
+            foreach (Users us in listUsers)
             {
-                isRunning = false;
-                MessageBox.Show("Stone win");
+                if (us.user == UserText.Text)
+                {
+                    if (winComboBox.SelectedIndex == a) us.CountWin += 1;
+                    else us.getLose();
+                }
             }
+            Pause = !Pause;
+            isRunning = false;
+            RemoveControlsFromUI();
+            threads.Clear();
+            Pause = !Pause;
+        }
+
+        private void createFileUsers()
+        {
+
+        }
+
+        private void changeLabel()
+        {
+            labelScore.Text = "";
+            
+            foreach(Users us in listUsers) 
+            labelScore.Text += us.user + " Win:" + us.CountWin + " Lose:" + us.CountLose + "\n";
         }
 
 
 
         private void CycleMoveSymbol(Symbol symbol)
         {
-            try { 
-                // Создайте таймер с указанной периодичностью
-                TimerCallback tm = new TimerCallback(CheckCollisionsType);
+            try {
+                // TimerCallback tm = new TimerCallback(SelectWin);
                 // создаем таймер
-               // Timer timer = new Timer(tm, symbol, 1000, 10);
-                
-                // TimerCallback collis = new TimerCallback(CheckCollisions);
+                // Timer timer = new Timer(tm, symbol, 1000, 10);
+               // TimerCallback tm = new TimerCallback(SelectWin);
+               // Timer timer = new Timer(tm, "kek", 100, 100);
+
+                //  TimerCallback collis = new TimerCallback(CheckCollisions);
                 // создаем таймер
                 //  Timer timerCollis = new Timer(collis, symbol, 0, 100);
-                // Запускаем бесконечный цикл для перемещения объекта Stone
                 while (isRunning)
                 {
                     if (!isRunning)
@@ -227,20 +320,20 @@ namespace лаба_3
                         symbol.setDy(-symbol.getDy());
                     }
 
-                    // Проверяем столкновения с другими объектами Stone
-                    CheckCollisions(symbol);
+                   CheckCollisions(symbol);
+                  // SelectWin();
                     //CheckCollisionsType(symbol);
                     //i/f (NumStones == 0 || NumScissors == 0 || NumPaper == 0)
                     //SelectWin();
-                    // Приостанавливаем поток на некоторое время
                     Thread.Sleep(100);
                 }
               //  timer.Dispose();
-            } catch (ObjectDisposedException e)
+            }
+            catch (ObjectDisposedException e)
             {
                 MessageBox.Show("Error " + e.Message);
             }
-            catch(NullReferenceException ex)
+            catch (NullReferenceException ex)
             {
                 MessageBox.Show("Error " + ex.Message);
             }
@@ -248,15 +341,13 @@ namespace лаба_3
             {
                 MessageBox.Show("Error " + exp.Message);
             }
-            
         }
 
         private void AddSymbol(Symbol symbol)
-        {
-            // Выполняем добавление объекта Stone на форму из главного потока
+        { 
             if (InvokeRequired)
             {
-                Invoke(new Action<Symbol>(AddSymbol), symbol);
+                BeginInvoke(new Action<Symbol>(AddSymbol), symbol);
             }
             else
             {
@@ -291,10 +382,11 @@ namespace лаба_3
                 {
                     if (otherSymbol != symbol && symbol.Bounds.IntersectsWith(otherSymbol.Bounds))
                     {
-                        // Обнаружено столкновение
-                        // Point collisionPoint = GetCollisionPoint(symbol, otherSymbol);
-                        //symbol.ChangeDirection(collisionPoint);
-                        //otherSymbol.ChangeDirection(collisionPoint);
+                    // Обнаружено столкновение
+                    // Point collisionPoint = GetCollisionPoint(symbol, otherSymbol);
+                    //symbol.ChangeDirection(collisionPoint);
+                    //otherSymbol.ChangeDirection(collisionPoint);
+                        CheckCollisionsType(symbol);
                         symbol.setDx(-symbol.getDx());
                         symbol.setDy(-symbol.getDy());
                         otherSymbol.setDx(-symbol.getDx());
@@ -309,8 +401,6 @@ namespace лаба_3
                         symbol.setDy(-symbol.getDy());
                         symbol.setTime(DateTime.MinValue);
                     }
-
-                    CheckCollisionsType(symbol);
                         //ChangeType(symbol,otherSymbol);
                         // otherSymbol.ChangeType(symbol);
                     }
@@ -475,6 +565,34 @@ namespace лаба_3
                 
                 controlsToRemove.RemoveAll(symbolsToRemove.Contains);
             }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+           // string jsonString = System.Text.Json.JsonSerializer.Serialize(listUsers);
+            string json = JsonConvert.SerializeObject(listUsers);
+            File.WriteAllText(jsonfile, json);
+            Pause = !Pause;
+            isRunning = false;
+       //     foreach (Thread thr in threads)
+         //   {
+        //        thr.Join();
+           // }
+            RemoveControlsFromUI();
+           // threads.Clear();
+          //  Pause = !Pause;
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void clearScoreButton_Click(object sender, EventArgs e)
+        {
+            labelScore.Text = "Score";
+            listUsers.Clear();
+
         }
     }
 }

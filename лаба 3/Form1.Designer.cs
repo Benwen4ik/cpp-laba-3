@@ -42,6 +42,10 @@ namespace лаба_3
             this.abort = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.speedbox = new System.Windows.Forms.TextBox();
+            this.UserText = new System.Windows.Forms.TextBox();
+            this.winComboBox = new System.Windows.Forms.ComboBox();
+            this.labelScore = new System.Windows.Forms.Label();
+            this.clearScoreButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
@@ -149,12 +153,51 @@ namespace лаба_3
             this.speedbox.Size = new System.Drawing.Size(44, 27);
             this.speedbox.TabIndex = 10;
             // 
+            // UserText
+            // 
+            this.UserText.Location = new System.Drawing.Point(13, 49);
+            this.UserText.Name = "UserText";
+            this.UserText.Size = new System.Drawing.Size(94, 27);
+            this.UserText.TabIndex = 11;
+            // 
+            // winComboBox
+            // 
+            this.winComboBox.FormattingEnabled = true;
+            this.winComboBox.Location = new System.Drawing.Point(123, 49);
+            this.winComboBox.Name = "winComboBox";
+            this.winComboBox.Size = new System.Drawing.Size(104, 28);
+            this.winComboBox.TabIndex = 12;
+            // 
+            // labelScore
+            // 
+            this.labelScore.AutoSize = true;
+            this.labelScore.Location = new System.Drawing.Point(863, 21);
+            this.labelScore.Name = "labelScore";
+            this.labelScore.Size = new System.Drawing.Size(46, 20);
+            this.labelScore.TabIndex = 13;
+            this.labelScore.Text = "Score";
+            this.labelScore.Click += new System.EventHandler(this.label5_Click);
+            // 
+            // clearScoreButton
+            // 
+            this.clearScoreButton.Location = new System.Drawing.Point(245, 49);
+            this.clearScoreButton.Name = "clearScoreButton";
+            this.clearScoreButton.Size = new System.Drawing.Size(94, 29);
+            this.clearScoreButton.TabIndex = 14;
+            this.clearScoreButton.Text = "Clear Score";
+            this.clearScoreButton.UseVisualStyleBackColor = true;
+            this.clearScoreButton.Click += new System.EventHandler(this.clearScoreButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.ClientSize = new System.Drawing.Size(1016, 516);
+            this.Controls.Add(this.clearScoreButton);
+            this.Controls.Add(this.labelScore);
+            this.Controls.Add(this.winComboBox);
+            this.Controls.Add(this.UserText);
             this.Controls.Add(this.speedbox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.abort);
@@ -168,6 +211,7 @@ namespace лаба_3
             this.Controls.Add(this.start);
             this.Name = "Form1";
             this.Text = "зонби дабалатория v 2.0;";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -187,6 +231,10 @@ namespace лаба_3
         private System.Windows.Forms.Button abort;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox speedbox;
+        private System.Windows.Forms.TextBox UserText;
+        private System.Windows.Forms.ComboBox winComboBox;
+        private System.Windows.Forms.Label labelScore;
+        private System.Windows.Forms.Button clearScoreButton;
     }
 }
 
