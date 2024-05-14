@@ -61,18 +61,29 @@ namespace лаба_3
 
         public Form1()
         {
-            InitializeComponent();
-            stonecount.Text = "3";
-            papercount.Text = "3";
-            scissorscount.Text = "3";
-            speedbox.Text = "5";
-            winComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            winComboBox.Items.Add("Stone");
-            winComboBox.Items.Add("Paper");
-            winComboBox.Items.Add("Scissors");
-            string jsonstring = File.ReadAllText(jsonfile);
-            listUsers = JsonConvert.DeserializeObject<List<Users>>(jsonstring);
-            changeLabel();
+            try
+            {
+                InitializeComponent();
+                stonecount.Text = "3";
+                papercount.Text = "3";
+                scissorscount.Text = "3";
+                speedbox.Text = "5";
+                winComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+                winComboBox.Items.Add("Stone");
+                winComboBox.Items.Add("Paper");
+                winComboBox.Items.Add("Scissors");
+                string jsonstring = "";
+                if (File.Exists(jsonfile))
+                {
+                    jsonstring = File.ReadAllText(jsonfile);
+                    listUsers = JsonConvert.DeserializeObject<List<Users>>(jsonstring);
+                }
+                changeLabel();
+            }
+            catch (Exception exp1)
+            {
+                MessageBox.Show("Error: " + exp1.Message);
+            }
         }
 
 
@@ -200,41 +211,49 @@ namespace лаба_3
 
         private async Task SelectWinAsync()
         {
-            while (isRunning)
+            try
             {
-                if (NumStones == 0 && NumScissors == 0)
+                while (isRunning)
                 {
-                    if (!foundUser(UserText.Text))
-                        listUsers.Add(new Users(UserText.Text,0, 0));
-                    isRunning = false;
-                    MessageBox.Show("Paper win");
-                    getScore(1);
-                    changeLabel();
+                    if (NumStones == 0 && NumScissors == 0)
+                    {
+                        if (!foundUser(UserText.Text))
+                            listUsers.Add(new Users(UserText.Text, 0, 0));
+                        isRunning = false;
+                        MessageBox.Show("Paper win");
+                        getScore(1);
+                        changeLabel();
+                    }
+                    if (NumStones == 0 && NumPaper == 0)
+                    {
+                        if (!foundUser(UserText.Text))
+                            listUsers.Add(new Users(UserText.Text, 0, 0));
+                        isRunning = false;
+                        MessageBox.Show("Scissors win");
+                        getScore(2);
+                        changeLabel();
+                    }
+                    if (NumPaper == 0 && NumScissors == 0)
+                    {
+                        if (!foundUser(UserText.Text))
+                            listUsers.Add(new Users(UserText.Text, 0, 0));
+                        isRunning = false;
+                        MessageBox.Show("Stone win");
+                        getScore(0);
+                        changeLabel();
+                    }
+                    await Task.Delay(100);
                 }
-                if (NumStones == 0 && NumPaper == 0)
-                {
-                    if (!foundUser(UserText.Text))
-                        listUsers.Add(new Users(UserText.Text, 0, 0));
-                    isRunning = false;
-                    MessageBox.Show("Scissors win");
-                    getScore(2);
-                    changeLabel();
-                }
-                if (NumPaper == 0 && NumScissors == 0)
-                {
-                    if (!foundUser(UserText.Text))
-                        listUsers.Add(new Users(UserText.Text, 0, 0));
-                    isRunning = false;
-                    MessageBox.Show("Stone win");
-                    getScore(0);
-                    changeLabel();
-                }
-                await Task.Delay(100);
+            }
+            catch (Exception exp)
+            {
+                MessageBox.Show("Error " + exp.Message);
             }
         }
 
         private bool foundUser(string name)
         {
+            if (listUsers == null) listUsers = new List<Users> { };
             foreach(Users user in listUsers)
             {
                 if (user.user == name) return true;
@@ -259,15 +278,16 @@ namespace лаба_3
             Pause = !Pause;
         }
 
-        private void createFileUsers()
-        {
-
-        }
+       
 
         private void changeLabel()
         {
             labelScore.Text = "";
-            
+            if (listUsers == null)
+            {
+                listUsers = new List<Users> { };
+                return;
+            }
             foreach(Users us in listUsers) 
             labelScore.Text += us.user + " Win:" + us.CountWin + " Lose:" + us.CountLose + "\n";
         }
